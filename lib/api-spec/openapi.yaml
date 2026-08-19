@@ -1,0 +1,618 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: Portfolio website API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: projects
+    description: Portfolio projects
+  - name: case-studies
+    description: Case studies
+  - name: gallery
+    description: Gallery images
+  - name: blog
+    description: Blog posts
+  - name: contact
+    description: Contact form
+  - name: newsletter
+    description: Newsletter subscriptions
+  - name: skills
+    description: Skills
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /projects:
+    get:
+      operationId: listProjects
+      tags: [projects]
+      summary: List all projects
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: year
+          in: query
+          schema:
+            type: integer
+        - name: tech
+          in: query
+          schema:
+            type: string
+        - name: featured
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: List of projects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Project"
+
+  /projects/featured:
+    get:
+      operationId: getFeaturedProjects
+      tags: [projects]
+      summary: Get featured projects for homepage
+      responses:
+        "200":
+          description: Featured projects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Project"
+
+  /projects/stats:
+    get:
+      operationId: getProjectStats
+      tags: [projects]
+      summary: Get project statistics (counts by category, tech, year)
+      responses:
+        "200":
+          description: Project stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectStats"
+
+  /projects/{slug}:
+    get:
+      operationId: getProject
+      tags: [projects]
+      summary: Get a single project by slug
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Project detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectDetail"
+        "404":
+          description: Not found
+
+  /case-studies:
+    get:
+      operationId: listCaseStudies
+      tags: [case-studies]
+      summary: List all case studies
+      responses:
+        "200":
+          description: List of case studies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CaseStudy"
+
+  /case-studies/{slug}:
+    get:
+      operationId: getCaseStudy
+      tags: [case-studies]
+      summary: Get a single case study by slug
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Case study detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CaseStudy"
+        "404":
+          description: Not found
+
+  /gallery:
+    get:
+      operationId: listGallery
+      tags: [gallery]
+      summary: List gallery images
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Gallery images
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GalleryImage"
+
+  /blog:
+    get:
+      operationId: listBlogPosts
+      tags: [blog]
+      summary: List blog posts
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: tag
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Blog posts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BlogPost"
+
+  /blog/recent:
+    get:
+      operationId: getRecentBlogPosts
+      tags: [blog]
+      summary: Get recent blog posts for homepage
+      responses:
+        "200":
+          description: Recent blog posts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BlogPost"
+
+  /blog/{slug}:
+    get:
+      operationId: getBlogPost
+      tags: [blog]
+      summary: Get a single blog post by slug
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Blog post detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlogPost"
+        "404":
+          description: Not found
+
+  /contact:
+    post:
+      operationId: submitContact
+      tags: [contact]
+      summary: Submit contact form
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContactInput"
+      responses:
+        "201":
+          description: Submission received
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContactResult"
+        "400":
+          description: Validation error
+
+  /contact/submissions:
+    get:
+      operationId: listContactSubmissions
+      tags: [contact]
+      summary: List contact submissions
+      responses:
+        "200":
+          description: Contact submissions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ContactSubmission"
+
+  /newsletter/subscribe:
+    post:
+      operationId: subscribe
+      tags: [newsletter]
+      summary: Subscribe to newsletter
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubscribeInput"
+      responses:
+        "201":
+          description: Subscribed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubscribeResult"
+        "400":
+          description: Validation error
+        "409":
+          description: Already subscribed
+
+  /skills:
+    get:
+      operationId: listSkills
+      tags: [skills]
+      summary: List all skills grouped by category
+      responses:
+        "200":
+          description: Skills
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SkillGroup"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+
+    Project:
+      type: object
+      required: [id, slug, title, description, techStack, category, year, featured]
+      properties:
+        id:
+          type: integer
+        slug:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        featuredImage:
+          type: ["string", "null"]
+        techStack:
+          type: array
+          items:
+            type: string
+        category:
+          type: string
+        year:
+          type: integer
+        duration:
+          type: ["string", "null"]
+        teamSize:
+          type: ["integer", "null"]
+        featured:
+          type: boolean
+        repositoryLink:
+          type: ["string", "null"]
+        liveLink:
+          type: ["string", "null"]
+        caseStudySlug:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    ProjectDetail:
+      type: object
+      required: [id, slug, title, description, techStack, category, year, featured]
+      properties:
+        id:
+          type: integer
+        slug:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        longDescription:
+          type: ["string", "null"]
+        featuredImage:
+          type: ["string", "null"]
+        galleryImages:
+          type: array
+          items:
+            type: string
+        techStack:
+          type: array
+          items:
+            type: string
+        category:
+          type: string
+        year:
+          type: integer
+        duration:
+          type: ["string", "null"]
+        teamSize:
+          type: ["integer", "null"]
+        featured:
+          type: boolean
+        repositoryLink:
+          type: ["string", "null"]
+        liveLink:
+          type: ["string", "null"]
+        caseStudySlug:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    ProjectStats:
+      type: object
+      required: [totalCount, byCategory, byYear, byTech]
+      properties:
+        totalCount:
+          type: integer
+        byCategory:
+          type: array
+          items:
+            $ref: "#/components/schemas/StatCount"
+        byYear:
+          type: array
+          items:
+            $ref: "#/components/schemas/StatCount"
+        byTech:
+          type: array
+          items:
+            $ref: "#/components/schemas/StatCount"
+
+    StatCount:
+      type: object
+      required: [label, count]
+      properties:
+        label:
+          type: string
+        count:
+          type: integer
+
+    CaseStudy:
+      type: object
+      required: [id, slug, title]
+      properties:
+        id:
+          type: integer
+        projectId:
+          type: ["integer", "null"]
+        projectSlug:
+          type: ["string", "null"]
+        projectTitle:
+          type: ["string", "null"]
+        slug:
+          type: string
+        title:
+          type: string
+        challenge:
+          type: ["string", "null"]
+        solution:
+          type: ["string", "null"]
+        technicalDetails:
+          type: ["string", "null"]
+        results:
+          type: ["string", "null"]
+        learnings:
+          type: ["string", "null"]
+        processImage:
+          type: ["string", "null"]
+        architectureDiagram:
+          type: ["string", "null"]
+        resultsImage:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    GalleryImage:
+      type: object
+      required: [id, imageUrl, category]
+      properties:
+        id:
+          type: integer
+        title:
+          type: ["string", "null"]
+        description:
+          type: ["string", "null"]
+        imageUrl:
+          type: string
+        thumbnailUrl:
+          type: ["string", "null"]
+        category:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        altText:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    BlogPost:
+      type: object
+      required: [id, slug, title, category]
+      properties:
+        id:
+          type: integer
+        slug:
+          type: string
+        title:
+          type: string
+        excerpt:
+          type: ["string", "null"]
+        content:
+          type: ["string", "null"]
+        author:
+          type: ["string", "null"]
+        category:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        featuredImage:
+          type: ["string", "null"]
+        readingTimeMinutes:
+          type: ["integer", "null"]
+        publishedAt:
+          type: ["string", "null"]
+        updatedAt:
+          type: ["string", "null"]
+
+    ContactInput:
+      type: object
+      required: [name, email, message]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        email:
+          type: string
+          format: email
+        message:
+          type: string
+          minLength: 1
+        budget:
+          type: string
+        timeline:
+          type: string
+
+    ContactResult:
+      type: object
+      required: [success, message]
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+
+    ContactSubmission:
+      type: object
+      required: [id, name, email, message, readStatus, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        message:
+          type: string
+        budget:
+          type: ["string", "null"]
+        timeline:
+          type: ["string", "null"]
+        readStatus:
+          type: boolean
+        respondedAt:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    SubscribeInput:
+      type: object
+      required: [email]
+      properties:
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+
+    SubscribeResult:
+      type: object
+      required: [success, message]
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+
+    SkillGroup:
+      type: object
+      required: [category, skills]
+      properties:
+        category:
+          type: string
+        skills:
+          type: array
+          items:
+            $ref: "#/components/schemas/Skill"
+
+    Skill:
+      type: object
+      required: [id, name, category, level]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        category:
+          type: string
+        level:
+          type: string
+        yearsOfExperience:
+          type: ["integer", "null"]
